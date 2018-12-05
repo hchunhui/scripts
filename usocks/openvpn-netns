@@ -1,0 +1,27 @@
+#!/bin/sh
+NETNS=ustcvpn
+case $script_type in
+	up)
+		echo 'nameserver 202.38.64.7' > /etc/netns/$NETNS/resolv.conf
+		ip netns add $NETNS
+		ip netns exec $NETNS ip link set dev lo up
+		ip link set dev "$1" up netns $NETNS mtu "$2"
+		ip netns exec $NETNS ip addr add dev "$1" \
+			"$4/${ifconfig_netmask:-30}" \
+			${ifconfig_broadcast:+broadcast "$ifconfig_broadcast"}
+		if [ -n "$ifconfig_ipv6_local" ]; then
+			ip netns exec $NETNS ip addr add dev "$1" \
+				"$ifconfig_ipv6_local"/112
+		fi
+		;;
+	route-up)
+		ip netns exec $NETNS ip route add default via "$route_vpn_gateway"
+		if [ -n "$ifconfig_ipv6_remote" ]; then
+			ip netns exec $NETNS ip route add default via \
+				"$ifconfig_ipv6_remote"
+		fi
+		;;
+	down)
+		ip netns delete $NETNS
+		;;
+esac

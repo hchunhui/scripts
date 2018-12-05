@@ -1,0 +1,26 @@
+#!/bin/sh
+case $script_type in
+	up)
+		ip link set dev "$1" up
+		ip addr add dev "$1" \
+			"$4/${ifconfig_netmask:-30}" \
+			${ifconfig_broadcast:+broadcast "$ifconfig_broadcast"}
+		if [ -n "$ifconfig_ipv6_local" ]; then
+			ip addr add dev "$1" \
+				"$ifconfig_ipv6_local"/112
+		fi
+		;;
+	route-up)
+		ip route add 45.76.215.69/32 via "$route_vpn_gateway"
+		ip route flush table 188
+		ip route add default via "$route_vpn_gateway" table 188
+		ip rule add fwmark 188 table 188
+		if [ -n "$ifconfig_ipv6_remote" ]; then
+			ip route add default via \
+				"$ifconfig_ipv6_remote"
+		fi
+		;;
+	down)
+		ip rule del fwmark 188
+		;;
+esac

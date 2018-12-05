@@ -1,0 +1,9 @@
+#!/bin/bash
+script=/usr/local/share/openvpn-netns
+config=dianxin.ovpn
+cd /home/hch/net/vpn/
+sudo openvpn \
+	--ifconfig-noexec --route-noexec \
+	--up "$script" --route-up "$script" --down "$script" \
+	 --config "$config" \
+	 --script-security 2 &

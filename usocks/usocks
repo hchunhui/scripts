@@ -1,0 +1,4 @@
+#!/bin/bash
+NETNS=ustcvpn
+args=`printf " %q" "$@"`
+sudo -- ip netns exec "$NETNS" sudo -u "$USER" "PATH=$PATH" "NETNS=$NETNS" -- sh -c "exec $args"
