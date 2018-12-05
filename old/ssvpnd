@@ -1,0 +1,1 @@
+sudo /home/hch/work/badvpn/tun2socks1 --netif-ipaddr 192.168.111.1 --netif-netmask 255.255.255.0 --socks-server-addr 127.0.0.1:1080 --tundev tun0 --udpgw-remote-server-addr 127.0.0.1:5353 --udpgw-transparent-dns

@@ -1,0 +1,42 @@
+#!/bin/bash
+
+NETNS=ustcvpn
+mkdir -p /etc/netns/$NETNS/
+#cp /etc/resolv.conf /etc/netns/$NETNS/resolv.conf
+
+echo 1 > /proc/sys/net/ipv4/ip_forward
+
+iptables -t nat -A POSTROUTING -s 192.168.200.0/24 -j MASQUERADE
+iptables -A FORWARD -s 192.168.200.0/24 -j ACCEPT
+iptables -A FORWARD -d 192.168.200.0/24 -j ACCEPT
+modprobe nf_conntrack_pptp
+
+ip netns add $NETNS
+ip link add name veth-$NETNS type veth peer name veth0
+ip link set dev veth0 netns $NETNS
+
+ip link set veth-$NETNS up
+ip addr add 192.168.200.254/24 dev veth-$NETNS
+
+ip netns exec $NETNS ip link set lo up
+ip netns exec $NETNS ip link set veth0 up
+ip netns exec $NETNS ip addr add 192.168.200.1/24 dev veth0
+ip netns exec $NETNS ip route add default via 192.168.200.254 dev veth0
+
+#ip netns exec $NETNS dnsmasq -r /etc/netns/$NETNS/resolv.conf
+ip netns exec $NETNS /usr/sbin/sshd
+
+#ip netns exec $NETNS pon ustc
+ip netns exec $NETNS login -f hch NETNS=$NETNS DISPLAY=:0
+#ip netns exec $NETNS poff ustc
+
+echo 'clean up...'
+sleep 1
+for pid in `ip netns pids $NETNS`; do
+	kill $pid
+done
+ip netns del $NETNS
+
+iptables -t nat -D POSTROUTING -s 192.168.200.0/24 -j MASQUERADE
+iptables -D FORWARD -s 192.168.200.0/24 -j ACCEPT
+iptables -D FORWARD -d 192.168.200.0/24 -j ACCEPT
