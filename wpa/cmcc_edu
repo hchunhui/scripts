@@ -1,0 +1,4 @@
+network={
+	ssid="CMCC-EDU"
+        key_mgmt=NONE
+}

@@ -1,0 +1,2 @@
+#!/bin/bash
+exec sudo wpa_supplicant -iwlan0 -C/var/run/wpa_supplicant
