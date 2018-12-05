@@ -5,5 +5,6 @@ cd /home/hch/net/vpn/
 sudo openvpn \
 	--ifconfig-noexec --route-noexec \
 	--up "$script" --route-up "$script" --down "$script" \
-	 --config "$config" \
-	 --script-security 2 &
+	--config "$config" \
+	--script-security 2 \
+	--tls-version-min 1.0 --tls-cipher DEFAULT:@SECLEVEL=0
